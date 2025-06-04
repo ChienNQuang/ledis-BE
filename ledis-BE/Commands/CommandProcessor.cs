@@ -17,6 +17,8 @@ public static class CommandProcessor
                 return Set(dataStore, arguments);
             case "RPUSH":
                 return RPush(dataStore, arguments);
+            case "RPOP":
+                return RPop(dataStore, arguments);
             default:
                 return Result<string>.Fail(Errors.UnknownCommand(command, arguments));
         }
@@ -90,6 +92,28 @@ public static class CommandProcessor
 
         return Result<string>.Success(added.ToString());
     }
-    
-    
+
+    private static Result<string> RPop(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 1)
+        {
+            return Result<string>.Fail(Errors.WrongNumberOfArguments("rpop"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            return Result<string>.Success(null);
+        }
+
+        if (value is not LedisList list)
+        {
+            return Result<string>.Fail(Errors.WrongType);
+        }
+
+        IStringValue? popValue = list.RPop();
+
+        return Result<string>.Success(popValue?.AsString());
+    }
 }
