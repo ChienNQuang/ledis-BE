@@ -10,14 +10,23 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
     public LinkedListListValue(IEnumerable<T> values)
     {
         _list = new DoublyLinkedList<T>();
-        foreach (T value in values)
-        {
-            _list.AddLast(value);
-        }
+        RPush(values);
     }
     
     public List<T> AsList()
     {
         return _list.Values().ToList();
+    }
+
+    public int RPush(IEnumerable<T> values)
+    {
+        int count = 0;
+        foreach (T value in values)
+        {
+            _list.AddLast(value);
+            count++;
+        }
+
+        return count;
     }
 }
