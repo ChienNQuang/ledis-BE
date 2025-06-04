@@ -29,4 +29,9 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
 
         return count;
     }
+
+    public T? RPop()
+    {
+        return _list.RemoveLast();
+    }
 }

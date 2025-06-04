@@ -19,6 +19,11 @@ public class LedisList : LedisValue
     {
         return _values.RPush(ToStringValues(values));
     }
+    
+    public IStringValue? RPop()
+    {
+        return _values.RPop();
+    }
 
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)
     {
