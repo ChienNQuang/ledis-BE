@@ -1,4 +1,4 @@
-namespace ledis_BE.Models.Types;
+namespace ledis_BE.Models.List;
 
 public class LedisList : LedisValue
 {
