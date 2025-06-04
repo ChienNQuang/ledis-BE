@@ -8,7 +8,7 @@ public static class CommandProcessor
 {
     private static readonly string[] BaseCommands = ["GET", "SET"];
 
-    public static string Process(DataStore dataStore, string command, string[] arguments)
+    public static Result<string> Process(DataStore dataStore, string command, string[] arguments)
     {
         string uppercaseCommand = command.ToUpper();
         if (BaseCommands.Any(c => c.Equals(uppercaseCommand)))
@@ -22,41 +22,41 @@ public static class CommandProcessor
             }
         }
 
-        return string.Empty;
+        return Result<string>.Ok();
     }
 
-    private static string Get(DataStore dataStore, string[] arguments)
+    private static Result<string> Get(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
         {
-            return "ERROR: wrong number of arguments for 'get' command";
+            return Result<string>.Fail(Errors.WrongNumberOfArguments("get"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
-            return "(nil)";
+            return Result<string>.Success(null);
         }
 
         if (value is null)
         {
-            return "(nil)";
+            return Result<string>.Success(null);
         }
 
         if (value is not LedisString stringValue)
         {
-            return "ERROR: WRONGTYPE Operation against a key holding the wrong kind of value";
+            return Result<string>.Fail(Errors.WrongType);
         }
 
-        return $"\"{stringValue}\"";
+        return Result<string>.Success($"\"{stringValue}\"");
     }
 
-    private static string Set(DataStore dataStore, string[] arguments)
+    private static Result<string> Set(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 2)
         {
-            return "ERROR: wrong number of arguments for 'set' command";
+            return Result<string>.Fail(Errors.WrongNumberOfArguments("set"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
@@ -65,6 +65,6 @@ public static class CommandProcessor
         dataStore.Data.Remove(key);
         dataStore.Data.Add(key, new LedisString(value));
 
-        return "OK";
+        return Result<string>.Ok();
     }
 }
