@@ -1,5 +1,6 @@
 using System.Text;
 using ledis_BE.Models;
+using ledis_BE.Models.List;
 using ledis_BE.Models.String;
 
 namespace ledis_BE.Commands;
@@ -14,6 +15,8 @@ public static class CommandProcessor
                 return Get(dataStore, arguments);
             case "SET":
                 return Set(dataStore, arguments);
+            case "RPUSH":
+                return RPush(dataStore, arguments);
             default:
                 return Result<string>.Fail(Errors.UnknownCommand(command, arguments));
         }
@@ -61,4 +64,32 @@ public static class CommandProcessor
 
         return Result<string>.Ok();
     }
+
+    private static Result<string> RPush(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length < 2)
+        {
+            return Result<string>.Fail(Errors.WrongNumberOfArguments("rpush"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+        string[] values = arguments[1..];
+        
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            value = new LedisList([]);
+            dataStore.Data.TryAdd(key, value);
+        }
+
+        if (value is not LedisList list)
+        {
+            return Result<string>.Fail(Errors.WrongType);
+        }
+
+        var added = list.RPush(values);
+
+        return Result<string>.Success(added.ToString());
+    }
+    
+    
 }
