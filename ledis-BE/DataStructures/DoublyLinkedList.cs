@@ -11,7 +11,7 @@ public class DoublyLinkedList<T>
 
         if (head is null)
         {
-            head = newNode;
+            head = tail = newNode;
         }
         else
         {
