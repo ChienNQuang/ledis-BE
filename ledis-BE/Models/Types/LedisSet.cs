@@ -1,4 +1,4 @@
-namespace ledis_BE.Models.DataStructures;
+namespace ledis_BE.Models.Types;
 
 public class LedisSet : LedisValue
 {

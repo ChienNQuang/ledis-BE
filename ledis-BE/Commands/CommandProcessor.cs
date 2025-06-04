@@ -1,5 +1,6 @@
+using System.Text;
 using ledis_BE.Models;
-using ledis_BE.Models.DataStructures;
+using ledis_BE.Models.String;
 
 namespace ledis_BE.Commands;
 
@@ -10,29 +11,28 @@ public static class CommandProcessor
     public static string Process(DataStore dataStore, string command, string[] arguments)
     {
         string uppercaseCommand = command.ToUpper();
-        byte[][] byteArguments = arguments.Select(Convert.FromBase64String).ToArray();
         if (BaseCommands.Any(c => c.Equals(uppercaseCommand)))
         {
             switch (uppercaseCommand)
             {
                 case "GET":
-                    return Get(dataStore, byteArguments);
+                    return Get(dataStore, arguments);
                 case "SET":
-                    return Set(dataStore, byteArguments);
+                    return Set(dataStore, arguments);
             }
         }
 
         return string.Empty;
     }
 
-    private static string Get(DataStore dataStore, byte[][] arguments)
+    private static string Get(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
         {
             return "ERROR: wrong number of arguments for 'get' command";
         }
 
-        byte[] key = arguments[0];
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
@@ -52,15 +52,15 @@ public static class CommandProcessor
         return $"\"{stringValue}\"";
     }
 
-    private static string Set(DataStore dataStore, byte[][] arguments)
+    private static string Set(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 2)
         {
             return "ERROR: wrong number of arguments for 'set' command";
         }
 
-        byte[] key = arguments[0];
-        byte[] value = arguments[1];
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+        string value = arguments[1];
 
         dataStore.Data.Remove(key);
         dataStore.Data.Add(key, new LedisString(value));
