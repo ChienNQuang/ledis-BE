@@ -1,3 +1,4 @@
+using ledis_BE.Endpoints;
 using ledis_BE.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,5 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapCommandEndpoints();
 
 app.Run();
