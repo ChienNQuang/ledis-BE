@@ -1,0 +1,6 @@
+@ledis_BE_HostAddress = http://localhost:5269
+
+GET {{ledis_BE_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
