@@ -6,23 +6,17 @@ namespace ledis_BE.Commands;
 
 public static class CommandProcessor
 {
-    private static readonly string[] BaseCommands = ["GET", "SET"];
-
     public static Result<string> Process(DataStore dataStore, string command, string[] arguments)
     {
-        string uppercaseCommand = command.ToUpper();
-        if (BaseCommands.Any(c => c.Equals(uppercaseCommand)))
+        switch (command.ToUpper())
         {
-            switch (uppercaseCommand)
-            {
-                case "GET":
-                    return Get(dataStore, arguments);
-                case "SET":
-                    return Set(dataStore, arguments);
-            }
+            case "GET":
+                return Get(dataStore, arguments);
+            case "SET":
+                return Set(dataStore, arguments);
+            default:
+                return Result<string>.Fail(Errors.UnknownCommand(command, arguments));
         }
-
-        return Result<string>.Ok();
     }
 
     private static Result<string> Get(DataStore dataStore, string[] arguments)
