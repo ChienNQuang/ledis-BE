@@ -21,6 +21,19 @@ public class DoublyLinkedList<T>
         }
     }
 
+    public T? RemoveLast()
+    {
+        if (tail is null) return default;
+
+        T value = tail.Value;
+
+        tail = tail.Prev;
+        if (tail is not null) tail.Next = null;
+        else head = null;
+
+        return value;
+    }
+
     public IEnumerable<T> Values()
     {
         DoublyLinkedListNode<T>? curr = head;
