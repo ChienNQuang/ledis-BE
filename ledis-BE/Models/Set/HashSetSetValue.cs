@@ -31,4 +31,9 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
     {
         return _set.Remove(value);
     }
+
+    public IEnumerable<T> SMembers()
+    {
+        return _set;
+    }
 }

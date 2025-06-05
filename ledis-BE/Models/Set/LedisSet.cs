@@ -26,6 +26,11 @@ public class LedisSet : LedisValue
         return _setValue.SRem(strVal);
     }
 
+    public IEnumerable<IStringValue> SMembers()
+    {
+        return _setValue.SMembers();
+    }
+
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)
     {
         return values.Select(v =>
