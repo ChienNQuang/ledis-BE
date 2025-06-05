@@ -1,6 +1,7 @@
 using System.Text;
 using ledis_BE.Models;
 using ledis_BE.Models.List;
+using ledis_BE.Models.Set;
 using ledis_BE.Models.String;
 using ledis_BE.Resp;
 
@@ -22,6 +23,8 @@ public static class CommandProcessor
                 return RPop(dataStore, arguments);
             case "LRANGE":
                 return LRange(dataStore, arguments);
+            case "SADD":
+                return SAdd(dataStore, arguments);
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
@@ -79,7 +82,7 @@ public static class CommandProcessor
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
         string[] values = arguments[1..];
-        
+
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
             value = new LedisList([]);
@@ -119,7 +122,7 @@ public static class CommandProcessor
 
         return new RespBulkString(popValue?.AsString());
     }
-    
+
     private static RespValue LRange(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 3)
@@ -128,7 +131,7 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
-        
+
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
             return new RespNull();
@@ -140,7 +143,7 @@ public static class CommandProcessor
         }
 
         var count = list.LLen();
-        
+
         string startStr = arguments[1];
         string stopStr = arguments[2];
 
@@ -148,7 +151,7 @@ public static class CommandProcessor
         {
             return new RespError(Errors.NotIntegerOrOutOfRange);
         }
-        
+
         if (!int.TryParse(stopStr, out var stop) || stop < 0 || stop >= count)
         {
             return new RespError(Errors.NotIntegerOrOutOfRange);
@@ -164,5 +167,31 @@ public static class CommandProcessor
         var resultElements = range.Select(x => new RespBulkString(x.AsString()));
 
         return new RespArray(resultElements);
+    }
+
+    private static RespValue SAdd(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length < 2)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("sadd"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+        string[] values = arguments[1..];
+
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            value = new LedisSet([]);
+            dataStore.Data.TryAdd(key, value);
+        }
+
+        if (value is not LedisSet set)
+        {
+            return new RespError(Errors.WrongType);
+        }
+
+        var added = set.SAdd(values);
+
+        return new RespInteger(added);
     }
 }
