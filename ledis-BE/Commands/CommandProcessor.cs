@@ -27,6 +27,8 @@ public static class CommandProcessor
                 return SAdd(dataStore, arguments);
             case "SREM":
                 return SRem(dataStore, arguments);
+            case "SMEMBERS":
+                return SMembers(dataStore, arguments);
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
@@ -220,5 +222,30 @@ public static class CommandProcessor
         bool res = set.SRem(valueToRemove);
 
         return new RespBoolean(res);
+    }
+    
+    private static RespValue SMembers(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 1)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("smembers"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            return new RespArray([]);
+        }
+
+        if (value is not LedisSet set)
+        {
+            return new RespError(Errors.WrongType);
+        }
+
+        IEnumerable<IStringValue> members = set.SMembers();
+        IEnumerable<RespBulkString> resultElements = members.Select(x => new RespBulkString(x.AsString()));
+
+        return new RespArray(resultElements);
     }
 }
