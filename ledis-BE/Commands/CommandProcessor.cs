@@ -33,6 +33,10 @@ public static class CommandProcessor
                 return Keys(dataStore, arguments);
             case "DEL":
                 return Del(dataStore, arguments);
+            case "EXPIRE":
+                return Expire(dataStore, arguments);
+            case "TTL":
+                return Ttl(dataStore, arguments);
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
@@ -303,6 +307,69 @@ public static class CommandProcessor
         }
 
         return new RespBoolean(true);
+    }
+
+    private static RespValue Expire(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 2)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("expire"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+        string secondsStr = arguments[1];
+
+        if (!int.TryParse(secondsStr, out int seconds))
+        {
+            return new RespError(Errors.NotIntegerOrOutOfRange);
+        }
+
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            // cannot expire a non-existent key
+            return new RespBoolean(false);
+        }
+
+        if (seconds <= 0)
+        {
+            // remove from data store
+            dataStore.Data.Remove(key);
+            return new RespBoolean(true);
+        }
+
+        long expiredTimestamp = DateTimeOffset.UtcNow.AddSeconds(seconds).ToUnixTimeMilliseconds();
+        dataStore.Expires.Remove(key);
+        dataStore.Expires.Add(key, expiredTimestamp);
+
+        return new RespBoolean(true);
+    }
+
+    private static RespValue Ttl(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 1)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("ttl"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
+
+        if (!dataStore.Data.ContainsKey(key))
+        {
+            // return -2 if the key does not exist
+            return new RespInteger(-2);
+        }
+
+        if (!dataStore.Expires.TryGetValue(key, out long timestamp))
+        {
+            // returns -1 if the key exists but has no associated expire
+            return new RespInteger(-1);
+        }
+
+        int ttl = (DateTimeOffset.FromUnixTimeMilliseconds(timestamp) - DateTimeOffset.UtcNow).Seconds;
+
+        return new RespInteger(ttl);
     }
 
     private static void CheckExpiration(DataStore dataStore, byte[] key)
