@@ -29,6 +29,8 @@ public static class CommandProcessor
                 return SRem(dataStore, arguments);
             case "SMEMBERS":
                 return SMembers(dataStore, arguments);
+            case "KEYS":
+                return Keys(dataStore, arguments);
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
@@ -245,6 +247,20 @@ public static class CommandProcessor
 
         IEnumerable<IStringValue> members = set.SMembers();
         IEnumerable<RespBulkString> resultElements = members.Select(x => new RespBulkString(x.AsString()));
+
+        return new RespArray(resultElements);
+    }
+    
+    private static RespValue Keys(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length > 0)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("keys"));
+        }
+
+        IEnumerable<string?> keys = dataStore.Data.Keys.Select(Encoding.UTF8.GetString);
+
+        IEnumerable<RespBulkString> resultElements = keys.Select(x => new RespBulkString(x));
 
         return new RespArray(resultElements);
     }
