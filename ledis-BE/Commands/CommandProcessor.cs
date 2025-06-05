@@ -19,6 +19,8 @@ public static class CommandProcessor
                 return RPush(dataStore, arguments);
             case "RPOP":
                 return RPop(dataStore, arguments);
+            case "LRANGE":
+                return LRange(dataStore, arguments);
             default:
                 return Result<string>.Fail(Errors.UnknownCommand(command, arguments));
         }
@@ -115,5 +117,51 @@ public static class CommandProcessor
         IStringValue? popValue = list.RPop();
 
         return Result<string>.Success(popValue?.AsString());
+    }
+    
+    private static Result<string> LRange(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 3)
+        {
+            return Result<string>.Fail(Errors.WrongNumberOfArguments("lrange"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+        
+        if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+        {
+            return Result<string>.Success(null);
+        }
+
+        if (value is not LedisList list)
+        {
+            return Result<string>.Fail(Errors.WrongType);
+        }
+
+        var count = list.LLen();
+        
+        string startStr = arguments[1];
+        string stopStr = arguments[2];
+
+        if (!int.TryParse(startStr, out var start) || start < 0 || start >= count)
+        {
+            return Result<string>.Fail(Errors.NotIntegerOrOutOfRange);
+        }
+        
+        if (!int.TryParse(stopStr, out var stop) || stop < 0 || stop >= count)
+        {
+            return Result<string>.Fail(Errors.NotIntegerOrOutOfRange);
+        }
+
+        if (start > stop)
+        {
+            // return empty array
+            return Result<string>.Success(null);
+        }
+
+        IEnumerable<IStringValue> range = list.LRange(start, stop);
+        string result = string.Join("\r\n", range.Select(x => x.AsString()));
+
+        return Result<string>.Success(result);
     }
 }

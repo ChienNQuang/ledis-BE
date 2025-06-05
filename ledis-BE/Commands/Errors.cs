@@ -9,4 +9,5 @@ public class Errors
         string argsStr = string.Join(" ", arguments.Select(x => $"'{x}'"));
         return $"unknown command '{cmdName}', with args beginning with: {argsStr}";
     }
+    public static string NotIntegerOrOutOfRange => "value is not an integer or out of range";
 }
