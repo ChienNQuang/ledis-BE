@@ -31,6 +31,8 @@ public static class CommandProcessor
                 return SMembers(dataStore, arguments);
             case "KEYS":
                 return Keys(dataStore, arguments);
+            case "DEL":
+                return Del(dataStore, arguments);
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
@@ -263,5 +265,22 @@ public static class CommandProcessor
         IEnumerable<RespBulkString> resultElements = keys.Select(x => new RespBulkString(x));
 
         return new RespArray(resultElements);
+    }
+    
+    private static RespValue Del(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length != 1)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("del"));
+        }
+
+        byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        if (!dataStore.Data.Remove(key, out _))
+        {
+            return new RespBoolean(false);
+        }
+
+        return new RespBoolean(true);
     }
 }
