@@ -47,6 +47,8 @@ public static class CommandProcessor
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
+        CheckExpiration(dataStore, key);
+
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
             return new RespNull();
@@ -89,6 +91,9 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
+
         string[] values = arguments[1..];
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
@@ -116,6 +121,8 @@ public static class CommandProcessor
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
+        CheckExpiration(dataStore, key);
+
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
             return new RespNull();
@@ -139,6 +146,8 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
@@ -185,6 +194,9 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
+
         string[] values = arguments[1..];
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
@@ -202,7 +214,7 @@ public static class CommandProcessor
 
         return new RespInteger(added);
     }
-    
+
     private static RespValue SRem(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 2)
@@ -211,6 +223,9 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
+
         string valueToRemove = arguments[1];
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
@@ -227,7 +242,7 @@ public static class CommandProcessor
 
         return new RespBoolean(res);
     }
-    
+
     private static RespValue SMembers(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
@@ -236,6 +251,8 @@ public static class CommandProcessor
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
+
+        CheckExpiration(dataStore, key);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
@@ -252,7 +269,7 @@ public static class CommandProcessor
 
         return new RespArray(resultElements);
     }
-    
+
     private static RespValue Keys(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length > 0)
@@ -260,13 +277,15 @@ public static class CommandProcessor
             return new RespError(Errors.WrongNumberOfArguments("keys"));
         }
 
+        ActiveExpiryCheck(dataStore);
+
         IEnumerable<string?> keys = dataStore.Data.Keys.Select(Encoding.UTF8.GetString);
 
         IEnumerable<RespBulkString> resultElements = keys.Select(x => new RespBulkString(x));
 
         return new RespArray(resultElements);
     }
-    
+
     private static RespValue Del(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
@@ -276,11 +295,45 @@ public static class CommandProcessor
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
+        CheckExpiration(dataStore, key);
+
         if (!dataStore.Data.Remove(key, out _))
         {
             return new RespBoolean(false);
         }
 
         return new RespBoolean(true);
+    }
+
+    private static void CheckExpiration(DataStore dataStore, byte[] key)
+    {
+        if (!dataStore.Expires.TryGetValue(key, out long timestamp))
+        {
+            return;
+        }
+
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (timestamp <= now)
+        {
+            dataStore.Data.Remove(key);
+            dataStore.Expires.Remove(key);
+        }
+    }
+
+    public static void ActiveExpiryCheck(DataStore dataStore)
+    {
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        List<byte[]> expiredKeys = [];
+        foreach (byte[] expiredKey in dataStore.Expires.Where(pair => pair.Value <= now).Select(p => p.Key))
+        {
+            expiredKeys.Add(expiredKey);
+        }
+
+        foreach (byte[] expiredKey in expiredKeys)
+        {
+            dataStore.Data.Remove(expiredKey);
+            dataStore.Expires.Remove(expiredKey);
+        }
     }
 }
