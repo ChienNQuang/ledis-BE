@@ -11,4 +11,6 @@ public interface IListValue<T> where T : IStringValue
     List<T> AsList();
     int RPush(IEnumerable<T> values);
     T? RPop();
+    IEnumerable<T> LRange(int start, int stop);
+    int LLen();
 }

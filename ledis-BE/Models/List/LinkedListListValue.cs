@@ -34,4 +34,19 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
     {
         return _list.RemoveLast();
     }
+
+    public IEnumerable<T> LRange(int start, int stop)
+    {
+        List<T> list = AsList();
+        // get until the list ends instead of throwing exceptions
+        for (int i = start; i <= stop && i < list.Count; i++)
+        {
+            yield return list[i];
+        }
+    }
+
+    public int LLen()
+    {
+        return AsList().Count;
+    }
 }

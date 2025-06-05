@@ -25,6 +25,16 @@ public class LedisList : LedisValue
         return _values.RPop();
     }
 
+    public IEnumerable<IStringValue> LRange(int start, int stop)
+    {
+        return _values.LRange(start, stop);
+    }
+
+    public int LLen()
+    {
+        return _values.LLen();
+    }
+
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)
     {
         return values.Select(v =>
