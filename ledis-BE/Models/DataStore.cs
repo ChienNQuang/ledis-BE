@@ -8,4 +8,5 @@ public class DataStore
     /// Key is stored as a byte array.
     /// </summary>
     public Dictionary<byte[], LedisValue?> Data { get; set; } = new(new ByteArrayComparer());
+    public Dictionary<byte[], long> Expires { get; set; } = new(new ByteArrayComparer());
 }
