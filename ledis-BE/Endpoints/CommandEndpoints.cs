@@ -12,7 +12,7 @@ public static class CommandEndpoints
             [FromBody] ProcessCommandRequest request,
             [FromServices] DataStore dataStore) =>
         {
-            Result<string> result = CommandProcessor.Process(dataStore, request.Command, request.Arguments);
+            Result result = CommandProcessor.Process(dataStore, request.Command, request.Arguments);
 
             return Results.Ok(result);
         });

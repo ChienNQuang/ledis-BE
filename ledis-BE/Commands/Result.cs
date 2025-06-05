@@ -1,38 +1,40 @@
+using ledis_BE.Resp;
+
 namespace ledis_BE.Commands;
 
-public class Result<T>
+public class Result
 {
     public bool IsSuccess { get; set; }
-    public T? Data { get; set; }
+    public object? Data { get; set; }
     public string? Message { get; set; }
 
     private Result()
     {
     }
     
-    public static Result<T> Ok()
+    public static Result Ok()
     {
-        return new Result<T>
+        return new Result
         {
             IsSuccess = true,
-            Data = default,
+            Data = null,
             Message = "OK",
         };
     }
 
-    public static Result<T> Success(T? data)
+    public static Result Success(RespValue? data)
     {
-        return new Result<T>
+        return new Result
         {
             IsSuccess = true,
-            Data = data,
+            Data = data?.GetValue(),
             Message = null,
         };
     }
 
-    public static Result<T> Fail(string message)
+    public static Result Fail(string message)
     {
-        return new Result<T>
+        return new Result
         {
             IsSuccess = false,
             Data = default,
