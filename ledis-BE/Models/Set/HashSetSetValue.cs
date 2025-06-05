@@ -1,3 +1,4 @@
+using ledis_BE.Comparers;
 using ledis_BE.Models.String;
 
 namespace ledis_BE.Models.Set;
@@ -8,7 +9,7 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
 
     public HashSetSetValue(IEnumerable<T> values)
     {
-        _set = [];
+        _set = new HashSet<T>(new StringValueComparer<T>());
         foreach (T value in values)
         {
             _set.Add(value);
