@@ -20,6 +20,12 @@ public class LedisSet : LedisValue
         return _setValue.SAdd(ToStringValues(values));
     }
 
+    public bool SRem(string value)
+    {
+        IStringValue strVal = ToStringValues([value]).First();
+        return _setValue.SRem(strVal);
+    }
+
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)
     {
         return values.Select(v =>

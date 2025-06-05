@@ -25,4 +25,9 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
 
         return count;
     }
+
+    public bool SRem(T value)
+    {
+        return _set.Remove(value);
+    }
 }
