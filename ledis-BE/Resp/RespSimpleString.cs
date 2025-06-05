@@ -7,4 +7,9 @@ public class RespSimpleString : RespValue
 
     public override RespValueType Type => RespValueType.SimpleString;
     public override object GetValue() => ValueWithType(Value);
+
+    public static RespValue Ok()
+    {
+        return new RespSimpleString("OK");
+    }
 }

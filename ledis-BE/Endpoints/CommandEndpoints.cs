@@ -1,5 +1,6 @@
 using ledis_BE.Commands;
 using ledis_BE.Models;
+using ledis_BE.Resp;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ledis_BE.Endpoints;
@@ -12,9 +13,9 @@ public static class CommandEndpoints
             [FromBody] ProcessCommandRequest request,
             [FromServices] DataStore dataStore) =>
         {
-            Result result = CommandProcessor.Process(dataStore, request.Command, request.Arguments);
+            RespValue result = CommandProcessor.Process(dataStore, request.Command, request.Arguments);
 
-            return Results.Ok(result);
+            return Results.Ok(result.GetValue());
         });
     }
 }

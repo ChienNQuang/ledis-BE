@@ -8,7 +8,7 @@ namespace ledis_BE.Commands;
 
 public static class CommandProcessor
 {
-    public static Result Process(DataStore dataStore, string command, string[] arguments)
+    public static RespValue Process(DataStore dataStore, string command, string[] arguments)
     {
         switch (command.ToUpper())
         {
@@ -23,42 +23,42 @@ public static class CommandProcessor
             case "LRANGE":
                 return LRange(dataStore, arguments);
             default:
-                return Result.Fail(Errors.UnknownCommand(command, arguments));
+                return new RespError(Errors.UnknownCommand(command, arguments));
         }
     }
 
-    private static Result Get(DataStore dataStore, string[] arguments)
+    private static RespValue Get(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
         {
-            return Result.Fail(Errors.WrongNumberOfArguments("get"));
+            return new RespError(Errors.WrongNumberOfArguments("get"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
-            return Result.Success(null);
+            return new RespNull();
         }
 
         if (value is null)
         {
-            return Result.Success(null);
+            return new RespNull();
         }
 
         if (value is not LedisString stringValue)
         {
-            return Result.Fail(Errors.WrongType);
+            return new RespError(Errors.WrongType);
         }
 
-        return Result.Success(new RespBulkString(stringValue.ToString()));
+        return new RespBulkString(stringValue.ToString());
     }
 
-    private static Result Set(DataStore dataStore, string[] arguments)
+    private static RespValue Set(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 2)
         {
-            return Result.Fail(Errors.WrongNumberOfArguments("set"));
+            return new RespError(Errors.WrongNumberOfArguments("set"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
@@ -67,14 +67,14 @@ public static class CommandProcessor
         dataStore.Data.Remove(key);
         dataStore.Data.Add(key, new LedisString(value));
 
-        return Result.Ok();
+        return RespSimpleString.Ok();
     }
 
-    private static Result RPush(DataStore dataStore, string[] arguments)
+    private static RespValue RPush(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length < 2)
         {
-            return Result.Fail(Errors.WrongNumberOfArguments("rpush"));
+            return new RespError(Errors.WrongNumberOfArguments("rpush"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
@@ -88,55 +88,55 @@ public static class CommandProcessor
 
         if (value is not LedisList list)
         {
-            return Result.Fail(Errors.WrongType);
+            return new RespError(Errors.WrongType);
         }
 
         var added = list.RPush(values);
 
-        return Result.Success(new RespInteger(added));
+        return new RespInteger(added);
     }
 
-    private static Result RPop(DataStore dataStore, string[] arguments)
+    private static RespValue RPop(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 1)
         {
-            return Result.Fail(Errors.WrongNumberOfArguments("rpop"));
+            return new RespError(Errors.WrongNumberOfArguments("rpop"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
 
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
-            return Result.Success(null);
+            return new RespNull();
         }
 
         if (value is not LedisList list)
         {
-            return Result.Fail(Errors.WrongType);
+            return new RespError(Errors.WrongType);
         }
 
         IStringValue? popValue = list.RPop();
 
-        return Result.Success(new RespBulkString(popValue?.AsString()));
+        return new RespBulkString(popValue?.AsString());
     }
     
-    private static Result LRange(DataStore dataStore, string[] arguments)
+    private static RespValue LRange(DataStore dataStore, string[] arguments)
     {
         if (arguments.Length != 3)
         {
-            return Result.Fail(Errors.WrongNumberOfArguments("lrange"));
+            return new RespError(Errors.WrongNumberOfArguments("lrange"));
         }
 
         byte[] key = Encoding.UTF8.GetBytes(arguments[0]);
         
         if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
         {
-            return Result.Success(null);
+            return new RespNull();
         }
 
         if (value is not LedisList list)
         {
-            return Result.Fail(Errors.WrongType);
+            return new RespError(Errors.WrongType);
         }
 
         var count = list.LLen();
@@ -146,23 +146,23 @@ public static class CommandProcessor
 
         if (!int.TryParse(startStr, out var start) || start < 0 || start >= count)
         {
-            return Result.Fail(Errors.NotIntegerOrOutOfRange);
+            return new RespError(Errors.NotIntegerOrOutOfRange);
         }
         
         if (!int.TryParse(stopStr, out var stop) || stop < 0 || stop >= count)
         {
-            return Result.Fail(Errors.NotIntegerOrOutOfRange);
+            return new RespError(Errors.NotIntegerOrOutOfRange);
         }
 
         if (start > stop)
         {
             // return empty array
-            return Result.Success(null);
+            return new RespArray([]);
         }
 
         IEnumerable<IStringValue> range = list.LRange(start, stop);
         var resultElements = range.Select(x => new RespBulkString(x.AsString()));
 
-        return Result.Success(new RespArray(resultElements));
+        return new RespArray(resultElements);
     }
 }
