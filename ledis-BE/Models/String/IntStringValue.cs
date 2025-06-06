@@ -13,4 +13,6 @@ public struct IntStringValue : IStringValue
     {
         return Value.ToString();
     }
+
+    public StringValueEncoding Encoding => StringValueEncoding.Int;
 }

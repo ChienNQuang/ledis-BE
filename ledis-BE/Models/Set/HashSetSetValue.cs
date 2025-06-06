@@ -16,6 +16,8 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
         }
     }
 
+    public SetValueEncoding Encoding => SetValueEncoding.Hashtable;
+
     public int SAdd(IEnumerable<T> values)
     {
         int count = 0;

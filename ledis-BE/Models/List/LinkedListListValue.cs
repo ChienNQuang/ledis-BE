@@ -18,6 +18,8 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
         return List.Values().ToList();
     }
 
+    public ListValueEncoding Encoding => ListValueEncoding.LinkedList;
+
     public int RPush(IEnumerable<T> values)
     {
         int count = 0;

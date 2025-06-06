@@ -5,12 +5,10 @@ namespace ledis_BE.Models.Set;
 public class LedisSet : LedisValue
 {
     public ISetValue<IStringValue> SetValue { get; set; }
-    public LedisSetEncoding Encoding { get; set; }
 
     public LedisSet(IEnumerable<string> values)
     {
         SetValue = new HashSetSetValue<IStringValue>(ToStringValues(values));
-        Encoding = LedisSetEncoding.Hashtable;
     }
 
     public override LedisValueType Type => LedisValueType.Set;
@@ -39,9 +37,4 @@ public class LedisSet : LedisValue
             return value;
         });
     }
-}
-
-public enum LedisSetEncoding
-{
-    Hashtable,
 }

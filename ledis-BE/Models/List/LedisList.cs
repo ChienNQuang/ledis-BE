@@ -5,12 +5,10 @@ namespace ledis_BE.Models.List;
 public class LedisList : LedisValue
 {
     public IListValue<IStringValue> ListValue { get; set; }
-    public LedisListEncoding Encoding { get; set; }
 
     public LedisList(IEnumerable<string> values)
     {
         ListValue = new LinkedListListValue<IStringValue>(ToStringValues(values));
-        Encoding = LedisListEncoding.LinkedList;
     }
     
     public override LedisValueType Type => LedisValueType.List;
@@ -43,9 +41,4 @@ public class LedisList : LedisValue
             return value;
         });
     }
-}
-
-public enum LedisListEncoding
-{
-    LinkedList,
 }

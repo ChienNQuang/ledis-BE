@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace ledis_BE.Models.String;
 
 public class RawStringValue : IStringValue
@@ -8,11 +6,13 @@ public class RawStringValue : IStringValue
 
     public RawStringValue(string value)
     {
-        Bytes = Encoding.UTF8.GetBytes(value);
+        Bytes = System.Text.Encoding.UTF8.GetBytes(value);
     }
 
     public string AsString()
     {
-        return Encoding.UTF8.GetString(Bytes);
+        return System.Text.Encoding.UTF8.GetString(Bytes);
     }
+
+    public StringValueEncoding Encoding => StringValueEncoding.Raw;
 }

@@ -9,8 +9,14 @@ namespace ledis_BE.Models.List;
 public interface IListValue<T> where T : IStringValue
 {
     List<T> AsList();
+    ListValueEncoding Encoding { get; }
     int RPush(IEnumerable<T> values);
     T? RPop();
     IEnumerable<T> LRange(int start, int stop);
     int LLen();
+}
+
+public enum ListValueEncoding
+{
+    LinkedList,
 }

@@ -7,4 +7,11 @@ namespace ledis_BE.Models.String;
 public interface IStringValue
 {
     string AsString();
+    StringValueEncoding Encoding { get; }
+}
+
+public enum StringValueEncoding
+{
+    Raw,
+    Int,
 }
