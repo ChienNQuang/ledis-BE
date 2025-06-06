@@ -31,6 +31,8 @@ public static class CommandProcessor
                 return SRem(dataStore, arguments);
             case "SMEMBERS":
                 return SMembers(dataStore, arguments);
+            case "SINTER":
+                return SInter(dataStore, arguments);
             case "KEYS":
                 return Keys(dataStore, arguments);
             case "DEL":
@@ -310,6 +312,50 @@ public static class CommandProcessor
         }
 
         IEnumerable<IStringValue> members = set.SMembers();
+        IEnumerable<RespBulkString> resultElements = members.Select(x => new RespBulkString(x.AsString()));
+
+        return new RespArray(resultElements);
+    }
+    
+    private static RespValue SInter(DataStore dataStore, string[] arguments)
+    {
+        if (arguments.Length < 1)
+        {
+            return new RespError(Errors.WrongNumberOfArguments("sinter"));
+        }
+
+        var keys = arguments.Select(Encoding.UTF8.GetBytes);
+        List<LedisSet> sets = [];
+
+        foreach (byte[] key in keys)
+        {
+            CheckExpiration(dataStore, key);
+            if (!dataStore.Data.TryGetValue(key, out LedisValue? value))
+            {
+                return new RespArray([]);
+            }
+
+            if (value is not LedisSet set)
+            {
+                return new RespError(Errors.WrongType);
+            }
+
+            sets.Add(set);
+        }
+
+        Dictionary<IStringValue, int> dictionary = new ();
+
+        foreach (IStringValue stringValue in sets.SelectMany(s => s.SMembers()))
+        {
+            if (!dictionary.TryAdd(stringValue, 1))
+            {
+                dictionary[stringValue]++;
+            }
+        }
+
+        IEnumerable<IStringValue> members = dictionary
+            .Where(p => p.Value == sets.Count)
+            .Select(p => p.Key);
         IEnumerable<RespBulkString> resultElements = members.Select(x => new RespBulkString(x.AsString()));
 
         return new RespArray(resultElements);
