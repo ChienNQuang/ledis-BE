@@ -183,6 +183,12 @@ public static class CommandProcessor
 
         IStringValue? popValue = list.RPop();
 
+        if (popValue is null)
+        {
+            dataStore.Data.Remove(key);
+            dataStore.Expires.Remove(key);
+        }
+
         return new RespBulkString(popValue?.AsString());
     }
 
@@ -287,6 +293,12 @@ public static class CommandProcessor
         }
 
         bool res = set.SRem(valueToRemove);
+
+        if (!set.SMembers().Any())
+        {
+            dataStore.Data.Remove(key);
+            dataStore.Expires.Remove(key);
+        }
 
         return new RespBoolean(res);
     }
