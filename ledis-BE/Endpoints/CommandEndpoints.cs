@@ -29,6 +29,16 @@ public static class CommandEndpoints
             
             return Results.File(fileStream, "application/json", fileName);
         });
+
+        app.MapPost("/commands/restore", (
+            IFormFile file,
+            [FromServices] DataStore dataStore) =>
+        {
+            bool ok = CommandProcessor.RestoreSnapshot(dataStore, file.OpenReadStream());
+
+            return ok ? Results.Ok(RespSimpleString.Ok()) : Results.UnprocessableEntity();
+        })
+        .DisableAntiforgery();
     }
 }
 

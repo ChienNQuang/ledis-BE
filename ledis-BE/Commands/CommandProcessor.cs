@@ -51,7 +51,7 @@ public static class CommandProcessor
             .ToDictionary(p => Convert.ToBase64String(p.Key), p => p.Value);
         Dictionary<string, long> serializableExpiresDict = dataStore.Expires
             .ToDictionary(p => Convert.ToBase64String(p.Key), p => p.Value);
-        var obj = new
+        SerializableDataStore obj = new SerializableDataStore
         {
             Data = serializableKvDict,
             Expires = serializableExpiresDict,
@@ -59,6 +59,28 @@ public static class CommandProcessor
         
         JsonSerializer.Serialize(stream, obj, LedisJsonOptions.Default);
         return stream;
+    }
+
+    public static bool RestoreSnapshot(DataStore dataStore, Stream fileStream)
+    {
+        SerializableDataStore? state = JsonSerializer.Deserialize<SerializableDataStore>(fileStream, LedisJsonOptions.Default);
+        if (state is null) return false;
+        
+        dataStore.Data.Clear();
+        dataStore.Expires.Clear();
+        
+        // restoring part
+        foreach (KeyValuePair<string, LedisValue?> kv in state.Data)
+        {
+            dataStore.Data.Add(Convert.FromBase64String(kv.Key), kv.Value);
+        }
+        
+        foreach (KeyValuePair<string, long> kv in state.Expires)
+        {
+            dataStore.Expires.Add(Convert.FromBase64String(kv.Key), kv.Value);
+        }
+        
+        return true;
     }
 
     private static RespValue Get(DataStore dataStore, string[] arguments)
