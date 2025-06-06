@@ -21,6 +21,8 @@ public class DoublyLinkedListConverter<T> : JsonConverter<DoublyLinkedList<T>>
             {
                 linkedList.AddLast(node.Value);
             }
+
+            return linkedList;
         }
 
         return null;
