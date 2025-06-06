@@ -5,17 +5,17 @@ namespace ledis_BE.Models.List;
 
 public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
 {
-    private readonly DoublyLinkedList<T> _list;
+    public DoublyLinkedList<T> List { get; set; }
 
     public LinkedListListValue(IEnumerable<T> values)
     {
-        _list = new DoublyLinkedList<T>();
+        List = new DoublyLinkedList<T>();
         RPush(values);
     }
     
     public List<T> AsList()
     {
-        return _list.Values().ToList();
+        return List.Values().ToList();
     }
 
     public int RPush(IEnumerable<T> values)
@@ -23,7 +23,7 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
         int count = 0;
         foreach (T value in values)
         {
-            _list.AddLast(value);
+            List.AddLast(value);
             count++;
         }
 
@@ -32,7 +32,7 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
 
     public T? RPop()
     {
-        return _list.RemoveLast();
+        return List.RemoveLast();
     }
 
     public IEnumerable<T> LRange(int start, int stop)

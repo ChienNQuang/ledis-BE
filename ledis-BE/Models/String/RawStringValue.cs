@@ -4,15 +4,15 @@ namespace ledis_BE.Models.String;
 
 public class RawStringValue : IStringValue
 {
-    private readonly byte[] _bytes;
+    public byte[] Bytes { get; set; }
 
     public RawStringValue(string value)
     {
-        _bytes = Encoding.UTF8.GetBytes(value);
+        Bytes = Encoding.UTF8.GetBytes(value);
     }
 
     public string AsString()
     {
-        return Encoding.UTF8.GetString(_bytes);
+        return Encoding.UTF8.GetString(Bytes);
     }
 }

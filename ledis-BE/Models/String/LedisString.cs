@@ -2,19 +2,19 @@ namespace ledis_BE.Models.String;
 
 public class LedisString : LedisValue
 {
-    private readonly IStringValue _value;
-    private readonly LedisStringEncoding _encoding;
+    public IStringValue Value { get; set; }
+    public LedisStringEncoding Encoding { get; set; }
 
     public LedisString(string value)
     {
-        (_value, _encoding) = StringHelpers.GetValueAndEncoding(value);
+        (Value, Encoding) = StringHelpers.GetValueAndEncoding(value);
     }
 
     public override LedisValueType Type => LedisValueType.String;
 
     public override string ToString()
     {
-        return _value.AsString();
+        return Value.AsString();
     }
 }
 

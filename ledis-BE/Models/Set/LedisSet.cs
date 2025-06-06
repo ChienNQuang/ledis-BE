@@ -4,31 +4,31 @@ namespace ledis_BE.Models.Set;
 
 public class LedisSet : LedisValue
 {
-    private readonly ISetValue<IStringValue> _setValue;
-    private readonly LedisSetEncoding _encoding;
+    public ISetValue<IStringValue> SetValue { get; set; }
+    public LedisSetEncoding Encoding { get; set; }
 
     public LedisSet(IEnumerable<string> values)
     {
-        _setValue = new HashSetSetValue<IStringValue>(ToStringValues(values));
-        _encoding = LedisSetEncoding.Hashtable;
+        SetValue = new HashSetSetValue<IStringValue>(ToStringValues(values));
+        Encoding = LedisSetEncoding.Hashtable;
     }
 
     public override LedisValueType Type => LedisValueType.Set;
 
     public int SAdd(IEnumerable<string> values)
     {
-        return _setValue.SAdd(ToStringValues(values));
+        return SetValue.SAdd(ToStringValues(values));
     }
 
     public bool SRem(string value)
     {
         IStringValue strVal = ToStringValues([value]).First();
-        return _setValue.SRem(strVal);
+        return SetValue.SRem(strVal);
     }
 
     public IEnumerable<IStringValue> SMembers()
     {
-        return _setValue.SMembers();
+        return SetValue.SMembers();
     }
 
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)

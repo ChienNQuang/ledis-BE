@@ -4,35 +4,35 @@ namespace ledis_BE.Models.List;
 
 public class LedisList : LedisValue
 {
-    private readonly IListValue<IStringValue> _values;
-    private readonly LedisListEncoding _encoding;
+    public IListValue<IStringValue> ListValue { get; set; }
+    public LedisListEncoding Encoding { get; set; }
 
     public LedisList(IEnumerable<string> values)
     {
-        _values = new LinkedListListValue<IStringValue>(ToStringValues(values));
-        _encoding = LedisListEncoding.LinkedList;
+        ListValue = new LinkedListListValue<IStringValue>(ToStringValues(values));
+        Encoding = LedisListEncoding.LinkedList;
     }
     
     public override LedisValueType Type => LedisValueType.List;
 
     public int RPush(IEnumerable<string> values)
     {
-        return _values.RPush(ToStringValues(values));
+        return ListValue.RPush(ToStringValues(values));
     }
     
     public IStringValue? RPop()
     {
-        return _values.RPop();
+        return ListValue.RPop();
     }
 
     public IEnumerable<IStringValue> LRange(int start, int stop)
     {
-        return _values.LRange(start, stop);
+        return ListValue.LRange(start, stop);
     }
 
     public int LLen()
     {
-        return _values.LLen();
+        return ListValue.LLen();
     }
 
     private static IEnumerable<IStringValue> ToStringValues(IEnumerable<string> values)

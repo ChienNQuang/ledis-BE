@@ -2,15 +2,15 @@ namespace ledis_BE.Models.String;
 
 public struct IntStringValue : IStringValue
 {
-    private readonly long _value;
+    public long Value { get; set; }
 
     public IntStringValue(long value)
     {
-        _value = value;
+        Value = value;
     }
 
     public string AsString()
     {
-        return _value.ToString();
+        return Value.ToString();
     }
 }

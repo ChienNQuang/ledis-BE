@@ -2,41 +2,41 @@ namespace ledis_BE.DataStructures;
 
 public class DoublyLinkedList<T>
 {
-    private DoublyLinkedListNode<T>? head;
-    private DoublyLinkedListNode<T>? tail;
+    public DoublyLinkedListNode<T>? Head { get; set; }
+    public DoublyLinkedListNode<T>? Tail { get; set; }
 
     public void AddLast(T value)
     {
         var newNode = new DoublyLinkedListNode<T>(value);
 
-        if (head is null)
+        if (Head is null)
         {
-            head = tail = newNode;
+            Head = Tail = newNode;
         }
         else
         {
-            tail!.Next = newNode;
-            newNode.Prev = tail;
-            tail = newNode;
+            Tail!.Next = newNode;
+            newNode.Prev = Tail;
+            Tail = newNode;
         }
     }
 
     public T? RemoveLast()
     {
-        if (tail is null) return default;
+        if (Tail is null) return default;
 
-        T value = tail.Value;
+        T value = Tail.Value;
 
-        tail = tail.Prev;
-        if (tail is not null) tail.Next = null;
-        else head = null;
+        Tail = Tail.Prev;
+        if (Tail is not null) Tail.Next = null;
+        else Head = null;
 
         return value;
     }
 
     public IEnumerable<T> Values()
     {
-        DoublyLinkedListNode<T>? curr = head;
+        DoublyLinkedListNode<T>? curr = Head;
         while (curr is not null)
         {
             yield return curr.Value;
@@ -47,9 +47,9 @@ public class DoublyLinkedList<T>
 
 public class DoublyLinkedListNode<T>
 {
-    public T Value;
-    public DoublyLinkedListNode<T>? Prev;
-    public DoublyLinkedListNode<T>? Next;
+    public T Value { get; set; }
+    public DoublyLinkedListNode<T>? Prev { get; set; }
+    public DoublyLinkedListNode<T>? Next { get; set; }
 
     public DoublyLinkedListNode(T value)
     {

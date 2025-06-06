@@ -5,14 +5,14 @@ namespace ledis_BE.Models.Set;
 
 public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
 {
-    private readonly HashSet<T> _set;
+    public HashSet<T> Set { get; set; }
 
     public HashSetSetValue(IEnumerable<T> values)
     {
-        _set = new HashSet<T>(new StringValueComparer<T>());
+        Set = new HashSet<T>(new StringValueComparer<T>());
         foreach (T value in values)
         {
-            _set.Add(value);
+            Set.Add(value);
         }
     }
 
@@ -21,7 +21,7 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
         int count = 0;
         foreach (T value in values)
         {
-            if (_set.Add(value)) count++;
+            if (Set.Add(value)) count++;
         }
 
         return count;
@@ -29,11 +29,11 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
 
     public bool SRem(T value)
     {
-        return _set.Remove(value);
+        return Set.Remove(value);
     }
 
     public IEnumerable<T> SMembers()
     {
-        return _set;
+        return Set;
     }
 }
