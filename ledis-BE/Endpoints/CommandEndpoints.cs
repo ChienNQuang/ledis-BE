@@ -17,6 +17,18 @@ public static class CommandEndpoints
 
             return Results.Ok(result.GetValue());
         });
+
+        app.MapGet("/commands/save", ([FromServices] DataStore dataStore) =>
+        {
+            Stream fileStream = CommandProcessor.SaveSnapshot(dataStore);
+            
+            if (fileStream.CanSeek)
+                fileStream.Position = 0;
+
+            string fileName = $"snapshot-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.json";
+            
+            return Results.File(fileStream, "application/json", fileName);
+        });
     }
 }
 

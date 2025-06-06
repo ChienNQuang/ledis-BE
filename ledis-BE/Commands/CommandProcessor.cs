@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using ledis_BE.Converters;
 using ledis_BE.Models;
 using ledis_BE.Models.List;
 using ledis_BE.Models.Set;
@@ -40,6 +42,33 @@ public static class CommandProcessor
             default:
                 return new RespError(Errors.UnknownCommand(command, arguments));
         }
+    }
+
+    public static Stream SaveSnapshot(DataStore dataStore)
+    {
+        Stream stream = new MemoryStream();
+        Dictionary<string, LedisValue?> serializableKvDict = dataStore.Data
+            .ToDictionary(p => Convert.ToBase64String(p.Key), p => p.Value);
+        Dictionary<string, long> serializableExpiresDict = dataStore.Expires
+            .ToDictionary(p => Convert.ToBase64String(p.Key), p => p.Value);
+        var obj = new
+        {
+            Data = serializableKvDict,
+            Expires = serializableExpiresDict,
+        };
+        
+        JsonSerializer.Serialize(stream, obj, new JsonSerializerOptions
+        {
+            Converters =
+            {
+                new LedisValueConverter(),
+                new StringValueConverter(),
+                new ListValueConverter(),
+                new SetValueConverter(),
+                new DoublyLinkedListConverter<IStringValue>()
+            },
+        });
+        return stream;
     }
 
     private static RespValue Get(DataStore dataStore, string[] arguments)
@@ -367,9 +396,9 @@ public static class CommandProcessor
             return new RespInteger(-1);
         }
 
-        int ttl = (DateTimeOffset.FromUnixTimeMilliseconds(timestamp) - DateTimeOffset.UtcNow).Seconds;
+        double ttl = (DateTimeOffset.FromUnixTimeMilliseconds(timestamp) - DateTimeOffset.UtcNow).TotalSeconds;
 
-        return new RespInteger(ttl);
+        return new RespInteger(Convert.ToInt64(ttl));
     }
 
     private static void CheckExpiration(DataStore dataStore, byte[] key)
