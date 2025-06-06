@@ -57,17 +57,7 @@ public static class CommandProcessor
             Expires = serializableExpiresDict,
         };
         
-        JsonSerializer.Serialize(stream, obj, new JsonSerializerOptions
-        {
-            Converters =
-            {
-                new LedisValueConverter(),
-                new StringValueConverter(),
-                new ListValueConverter(),
-                new SetValueConverter(),
-                new DoublyLinkedListConverter<IStringValue>()
-            },
-        });
+        JsonSerializer.Serialize(stream, obj, LedisJsonOptions.Default);
         return stream;
     }
 
