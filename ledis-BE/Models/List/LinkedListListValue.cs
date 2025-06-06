@@ -24,16 +24,12 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
 
     public ListValueEncoding Encoding => ListValueEncoding.LinkedList;
 
-    public int RPush(IEnumerable<T> values)
+    public void RPush(IEnumerable<T> values)
     {
-        int count = 0;
         foreach (T value in values)
         {
             List.AddLast(value);
-            count++;
         }
-
-        return count;
     }
 
     public T? RPop()

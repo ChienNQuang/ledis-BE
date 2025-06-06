@@ -17,9 +17,9 @@ public class LedisList : LedisValue
     
     public override LedisValueType Type => LedisValueType.List;
 
-    public int RPush(IEnumerable<string> values)
+    public void RPush(IEnumerable<string> values)
     {
-        return ListValue.RPush(ToStringValues(values));
+        ListValue.RPush(ToStringValues(values));
     }
     
     public IStringValue? RPop()

@@ -154,9 +154,10 @@ public static class CommandProcessor
             return new RespError(Errors.WrongType);
         }
 
-        var added = list.RPush(values);
+        list.RPush(values);
+        int count = list.LLen();
 
-        return new RespInteger(added);
+        return new RespInteger(count);
     }
 
     private static RespValue RPop(DataStore dataStore, string[] arguments)
