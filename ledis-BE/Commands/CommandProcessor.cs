@@ -65,23 +65,31 @@ public static class CommandProcessor
 
     public static bool RestoreSnapshot(DataStore dataStore, Stream fileStream)
     {
-        SerializableDataStore? state = JsonSerializer.Deserialize<SerializableDataStore>(fileStream, LedisJsonOptions.Default);
-        if (state is null) return false;
-        
-        dataStore.Data.Clear();
-        dataStore.Expires.Clear();
-        
-        // restoring part
-        foreach (KeyValuePair<string, LedisValue?> kv in state.Data)
+        try
         {
-            dataStore.Data.Add(Convert.FromBase64String(kv.Key), kv.Value);
+            SerializableDataStore? state =
+                JsonSerializer.Deserialize<SerializableDataStore>(fileStream, LedisJsonOptions.Default);
+            if (state is null) return false;
+
+            dataStore.Data.Clear();
+            dataStore.Expires.Clear();
+
+            // restoring part
+            foreach (KeyValuePair<string, LedisValue?> kv in state.Data)
+            {
+                dataStore.Data.Add(Convert.FromBase64String(kv.Key), kv.Value);
+            }
+
+            foreach (KeyValuePair<string, long> kv in state.Expires)
+            {
+                dataStore.Expires.Add(Convert.FromBase64String(kv.Key), kv.Value);
+            }
         }
-        
-        foreach (KeyValuePair<string, long> kv in state.Expires)
+        catch
         {
-            dataStore.Expires.Add(Convert.FromBase64String(kv.Key), kv.Value);
+            return false;
         }
-        
+
         return true;
     }
 
