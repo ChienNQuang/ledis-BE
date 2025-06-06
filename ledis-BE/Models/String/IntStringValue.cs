@@ -4,6 +4,10 @@ public struct IntStringValue : IStringValue
 {
     public long Value { get; set; }
 
+    public IntStringValue()
+    {
+    }
+
     public IntStringValue(long value)
     {
         Value = value;

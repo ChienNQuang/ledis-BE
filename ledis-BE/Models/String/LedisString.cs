@@ -4,6 +4,10 @@ public class LedisString : LedisValue
 {
     public IStringValue Value { get; set; }
 
+    public LedisString()
+    {
+    }
+    
     public LedisString(string value)
     {
         (Value, _) = StringHelpers.GetValueAndEncoding(value);

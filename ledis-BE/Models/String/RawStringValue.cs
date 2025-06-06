@@ -4,6 +4,10 @@ public class RawStringValue : IStringValue
 {
     public byte[] Bytes { get; set; }
 
+    public RawStringValue()
+    {
+    }
+    
     public RawStringValue(string value)
     {
         Bytes = System.Text.Encoding.UTF8.GetBytes(value);

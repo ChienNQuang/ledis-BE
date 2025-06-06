@@ -6,6 +6,10 @@ public class LedisList : LedisValue
 {
     public IListValue<IStringValue> ListValue { get; set; }
 
+    public LedisList()
+    {
+    }
+    
     public LedisList(IEnumerable<string> values)
     {
         ListValue = new LinkedListListValue<IStringValue>(ToStringValues(values));

@@ -7,6 +7,10 @@ public class LinkedListListValue<T> : IListValue<T> where T : IStringValue
 {
     public DoublyLinkedList<T> List { get; set; }
 
+    public LinkedListListValue()
+    {
+    }
+
     public LinkedListListValue(IEnumerable<T> values)
     {
         List = new DoublyLinkedList<T>();

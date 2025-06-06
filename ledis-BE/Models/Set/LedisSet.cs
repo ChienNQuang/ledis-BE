@@ -6,6 +6,10 @@ public class LedisSet : LedisValue
 {
     public ISetValue<IStringValue> SetValue { get; set; }
 
+    public LedisSet()
+    {
+    }
+    
     public LedisSet(IEnumerable<string> values)
     {
         SetValue = new HashSetSetValue<IStringValue>(ToStringValues(values));

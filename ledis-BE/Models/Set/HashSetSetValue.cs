@@ -7,6 +7,10 @@ public class HashSetSetValue<T> : ISetValue<T> where T : IStringValue
 {
     public HashSet<T> Set { get; set; }
 
+    public HashSetSetValue()
+    {
+    }
+    
     public HashSetSetValue(IEnumerable<T> values)
     {
         Set = new HashSet<T>(new StringValueComparer<T>());
